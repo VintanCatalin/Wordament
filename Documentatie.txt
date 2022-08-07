@@ -17,7 +17,7 @@ Functionare:
 
 COMENZI IN TERMINAL PENTRU A COMPILA JOCUL:
 gcc -o threads1 threads1.c -l pthread
-gcc -o aclient aclient.c
+gcc -o aclient admin_client.c
 gcc -o iclient inet_client.c
 
 COMENZI IN TERMINAL PENTRU A RULA JOCUL:
