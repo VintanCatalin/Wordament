@@ -22,7 +22,7 @@ gcc -o iclient inet_client.c
 
 COMENZI IN TERMINAL PENTRU A RULA JOCUL:
 ./threads1 -- ruleaza server-ul
-./client -- aceasta comanda se foloseste in alt terminal
+./aclient -- aceasta comanda se foloseste in alt terminal
 ./iclient -- aceasta comanda se foloseste in alt terminal
 
 
