@@ -1,0 +1,29 @@
+		WORDAMENT
+
+Aplicatia de fata simuleaza un joc de wordament in care toate literele din tablou sunt diferite una de alta.
+Reguli de joc:
+	Dupa ce sunt pornite serverul UNIX si serverul INET prin comanda ./threads1 in alt terminal se executa comanda ./client si va fi afisat pe ecran un tablou cu litere aletoare, din care jucatorul va trebui sa scrie cuvintele pe care le poate forma din literele grupate una langa alta in tablou.
+
+Functionare:
+	In fisierul threads1.c este realizat socket-ul de tip UNIX si cel de tip INET in void *unix_main(void *args) {} respectiv in void *inet_main(void *args) {}. Cei doi algoritmi sunt aproape identici, asa ca am sa descriu in aceasta documentatie doar unul dintre ei, mai exact serverul UNIX si am sa mentionez diferentele cheie.
+	Prima data se creeaza un array cu literele aleatoare cu functia litere_aleatoare(k). Functia litere aleatoare foloseste "t = rand() % (upper - lower + 1) + lower" ca pozitie  in tabloul *litere = "abcdefghijklmnopqrstuvwxyz" si intr-un "for(i=0;i<=24;i++)" adauga in tabloul k lietere aleatorii din pozitia t a tobloului *litere. Pentru ca toate literele sa fie diferite se foloseste o functie de cautare si daca se gaseste in tabloul k aceeasi litera ca si k[i] atunci i = i - 1 pentru a mai incerca odata o alta litera aleatoare. Dupa care se creeaza cu functia void creare_tablou(a,k) creeam tablou prin doua for-uri combinate si atribuim variabilei a[i][j]= k[nrvec];
+	Acum ca avem gata pregatit tabloul, ne mai trebuie un client care sa se joace. Pentru acesta vom folosi socket(AF_UNIX, SOCK_SEQPACKET, 0), bind(connection_socket, (const struct sockaddr *)&name, sizeof(name)), listen(connection_socket, 20) si intr-un for(;;) initializam descriptorul data_socket = accept(connection_socket, NULL, NULL). In acelasi for se va scrie prin varibaila buffer si prin apelul write(data_socket, buffer, strlen(buffer) +1) catre clientul de administrare sirul de caractere formate din literele aleatoare. Dupa care in alt for(;;) citim in varibila buffer un cuvant trimis de catre client (clientul de administrare in cazul acesta). Jucatorul dupa ce ruleaza programul client poate sa scrie comanda "NEXT" pentru a i se genera un tablou nou cu alte litere aleatoare. Asadar in programul server daca s-a citit cuvantul NEXT folom functiile litere_aleatoare() si creare_tablou() pentru a genera un nou tablou si pentru a trimite catre client prin write() un sir de litere aleatoare nou. Daca nu se verifica daca cuvantul se afla in fisierul txt dictionary.txt prin functia cautfis(). rez1 primeste rezultatul  cautarii si este trimis prin write() catre client. Daca s-a gasit cuvantul in fisier o noua variabila result primeste verificarea acelui cuvant cu functia verificare_cuvant() si il trimite la client cu apelul functiei write(). Conform variabilei result se va afisa daca cuvantul respecta regulile jocului. Mai exista posibilitatea ca jucatorul sa doreasca sa isi opreasca sesiunea de joc, asadar daca va scrie cuvantul "STOP" serverul unix cat si clientul se vor opri.Deasemenea clientul admin poate sa scrie "KCI" pentru a ucide thread-ul inet.
+	Partea de transfer de fisiere functioneaza cand clientul admin inceteaza ultimul conexiunea la server. Acest transfer de date intre fisiere consta in transmiterea scorurilor clientilor (jucatorilor). Prima data clientul_inet (unix sau python) trebuie sa tasteze comanda "STOP" pentru a opri sesiunea de joc. In momentul in care sesiunea de joc este oprinta pentru clientul inet programul deschide doua fisiere: scor_iclient.txt si Scoruri_Jucatori_iclient.txt cu permisiuni de citire/scriere. Dupa care va scrie in scor_iclient, scorul clientului_inet si cu comanda lseek se muta pozitia din fisier la inceputul acestuia, apoi citeste acest cuvant si il trimite folosind apelul functiei send() la server. In programul server, in functia inet_main() este deschos fisierul Scoruri_Jucatori.txt si este receptat cuvantul trimis de programul iclient.c apoi se pune in asteptare printr-un while. Dupa ce jucatorul admin foloseste si el comanda "STOP", se deschid fisierele scor_aclient.txt si Scoruri_Jucatori_aclient.txt, se scrie in fisierul scor_aclient.txt, scorul si se procedeaza la fel ca la programul iclient. Apoi se trimite scorul la programul server si este receptat in functia unix_main unde este deschis fisierul Scoruri_Jucatori si scris in el scorul de la client si setata pozitia cu lseek la inceputul fisierului. Se citesc datele din fisierul Scoruri_Jucatori.txt cu while(read(sj,cuvdinfism50)>0 si se trimit prin apelul functiei send la clientul administrator care le receptioneaza folosind un while(recv()>0) si se scrie in fisierul Scoruri_Jucatori_aclient scorurile ambilor jucatori. Dupa care se atribuie variabilei cond_var valoarea 1 care permite while-ulului din funcita inet_main sa treaca mai departe si sa trimita cuvintele din fisierul Scoruri_Jucatori.txt la programul iclient.c care la randul lui va scrie in fisierul Scoruri_Jucatori_iclient.txt scorurile jucatorilor. 
+	Clientul Python functioneaza la fel ca si clientul inet si poate fi utilizat in sistemul de operare windows 10.                
+	Serverul functioneaza cu doua tipuri de socluri unix si inet iar acestea sunt activate simultan folosind pthred-uri. 
+	                              		
+  	
+
+
+COMENZI IN TERMINAL PENTRU A COMPILA JOCUL:
+gcc -o threads1 threads1.c -l pthread
+gcc -o client client.h
+gcc -o iclient inet_client.c
+
+COMENZI IN TERMINAL PENTRU A RULA JOCUL:
+./threads1 -- ruleaza server-ul
+./client -- aceasta comanda se foloseste in alt terminal
+./iclient -- aceasta comanda se foloseste in alt terminal
+
+
+
